@@ -1,0 +1,9 @@
+flask
+flask-cors
+flask-socketio
+duckdb
+google-api-python-client
+google-auth
+google-auth-oauthlib
+google-auth-httplib2
+eventlet
