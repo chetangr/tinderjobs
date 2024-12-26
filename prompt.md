@@ -1,4 +1,0 @@
-Start with the prompt below
-
-Generate an image
-Prompt: A dynamically innovative recruitment platform akin to Tinder/Bumble, specifically designed for job listings. Imagine a digital masterpiece showcasing a bustling array of job opportunities, displayed in a sleek and user-friendly interface. Each listing adorned with vivid details like company logos, job titles, and brief descriptions, enticing users with its modern and efficient design. This striking image effortlessly captures the essence of job hunting in the digital age, blending functionality with style to create a visual experience that is both engaging and informative.
