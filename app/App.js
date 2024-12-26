@@ -1,20 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import { SafeAreaView, Text, StyleSheet, View, TouchableOpacity } from 'react-native';
-import Swiper from 'react-native-deck-swiper';
+import React, { useState, useEffect, useRef } from 'react';
+import { SafeAreaView, Text, StyleSheet, View, TouchableOpacity, useWindowDimensions } from 'react-native';
 import axios from 'axios';
+import Swiper from 'react-native-deck-swiper';
+import Slider from 'react-slick';
 import JobCard from './src/components/JobCard';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import ProfileScreen from './src/screens/ProfileScreen';
+import 'slick-carousel/slick/slick.css';
 
-// Home Screen with Job Swiper
+// Home Screen Component
 function HomeScreen({ navigation }) {
     const [jobs, setJobs] = useState([]);
     const [loading, setLoading] = useState(true);
+    const swiperRef = useRef(null);
+    const { width } = useWindowDimensions();
 
-    // Fetch jobs and process skills using useEffect
+    // Fetch Jobs
     useEffect(() => {
-        axios.get('http://localhost:8000/jobs')  // Replace with your actual endpoint
+        axios.get('http://localhost:8000/jobs')
             .then((res) => {
                 const processedJobs = res.data.map(job => ({
                     ...job,
@@ -30,12 +34,22 @@ function HomeScreen({ navigation }) {
             });
     }, []);
 
+    // Slick Carousel Settings (Desktop)
+    const settings = {
+        dots: true,
+        infinite: true,
+        speed: 500,
+        slidesToShow: 1,
+        slidesToScroll: 1,
+        centerMode: true,
+        centerPadding: '100px',
+        autoplay: true,
+    };
+
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.headerContainer}>
                 <Text style={styles.header}>Swipe for Jobs</Text>
-                
-                {/* Settings Icon */}
                 <TouchableOpacity
                     onPress={() => navigation.navigate('Profile')}
                     style={styles.settingsIcon}
@@ -44,22 +58,83 @@ function HomeScreen({ navigation }) {
                 </TouchableOpacity>
             </View>
 
+            {/* Conditional Rendering for Desktop/Mobile */}
             <View style={styles.swiperContainer}>
                 {loading ? (
                     <Text>Loading Jobs...</Text>
-                ) : jobs.length > 0 ? (
-                    <Swiper
-                        cards={jobs}
-                        renderCard={(job) => <JobCard job={job} />}
-                        stackSize={3}
-                        verticalSwipe={false}
-                        onSwipedRight={(index) => console.log("Applied to", jobs[index]?.title)}
-                        onSwipedLeft={(index) => console.log("Skipped", jobs[index]?.title)}
-                        backgroundColor={'#f4f4f4'}
-                    />
                 ) : (
-                    <Text>No Jobs Available</Text>
+                    <>
+                        {width > 900 ? (
+                            // Carousel for Desktop
+                            // <Slider {...settings}>
+                            //     {jobs.map((job, index) => (
+                            //         <JobCard key={index} job={job} />
+                            //     ))}
+                            // </Slider>
+<View style={styles.swiperContainer}>
+    <Slider {...settings}>
+        <div>
+            <h3 style={{ textAlign: 'center' }}>Slide 1</h3>
+        </div>
+        <div>
+            <h3 style={{ textAlign: 'center' }}>Slide 2</h3>
+        </div>
+        <div>
+            <h3 style={{ textAlign: 'center' }}>Slide 3</h3>
+        </div>
+    </Slider>
+</View>
+                        ) : (
+                            // Tinder-Style Swipe for Mobile
+                            <Swiper
+                                ref={swiperRef}
+                                cards={jobs}
+                                renderCard={(job) => <JobCard job={job} />}
+                                stackSize={3}
+                                verticalSwipe={false}
+                                backgroundColor={'transparent'}
+                            />
+                        )}
+                    </>
                 )}
+            </View>
+
+            {/* Swipe/Carousel Buttons */}
+            {width <= 900 && (
+                <View style={styles.buttonContainer}>
+                    <TouchableOpacity
+                        style={[styles.button, styles.rejectButton]}
+                        onPress={() => swiperRef.current?.swipeLeft()}
+                    >
+                        <Text style={styles.buttonText}>❌ Skip</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={[styles.button, styles.applyButton]}
+                        onPress={() => swiperRef.current?.swipeRight()}
+                    >
+                        <Text style={styles.buttonText}>✔️ Apply</Text>
+                    </TouchableOpacity>
+                </View>
+            )}
+
+            {/* Bottom Navigation */}
+            <View style={styles.navBar}>
+                <TouchableOpacity style={styles.navItem}>
+                    <Text>🏠</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.navItem}>
+                    <Text>💼</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.navItem}>
+                    <Text>💬</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={styles.navItem}
+                    onPress={() => navigation.navigate('Profile')}
+                >
+                    <Text>👤</Text>
+                </TouchableOpacity>
             </View>
         </SafeAreaView>
     );
@@ -88,11 +163,23 @@ export default function App() {
 }
 
 // Styles
+const slickStyles = {
+    sliderContainer: {
+        margin: 'auto',
+        width: '85%',
+    },
+    arrow: {
+        fontSize: '24px',
+        color: '#333',
+    },
+    dots: {
+        bottom: '-30px',
+    },
+};
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
         backgroundColor: '#f4f4f4',
     },
     headerContainer: {
@@ -101,7 +188,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         width: '100%',
         paddingHorizontal: 20,
-        marginBottom: 20,
+        marginTop: 20,
     },
     header: {
         fontSize: 32,
@@ -114,9 +201,41 @@ const styles = StyleSheet.create({
         fontSize: 28,
     },
     swiperContainer: {
-        width: '90%',
-        height: 500,
+        flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
+        width: '90%',
+    },
+    buttonContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-evenly',
+        marginBottom: 90,
+    },
+    button: {
+        paddingVertical: 15,
+        paddingHorizontal: 40,
+        borderRadius: 30,
+    },
+    rejectButton: {
+        backgroundColor: '#ff5757',
+    },
+    applyButton: {
+        backgroundColor: '#4caf50',
+    },
+    buttonText: {
+        fontSize: 18,
+        color: 'white',
+        fontWeight: 'bold',
+    },
+    navBar: {
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        backgroundColor: 'white',
+        paddingVertical: 15,
+        borderTopWidth: 1,
+        borderColor: '#ddd',
+    },
+    navItem: {
+        padding: 10,
     },
 });
