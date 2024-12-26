@@ -14,7 +14,7 @@ conn = duckdb.connect('jobs.db')
 
 # Google Calendar Setup
 SCOPES = ['https://www.googleapis.com/auth/calendar']
-SERVICE_ACCOUNT_FILE = 'credentials.json'
+SERVICE_ACCOUNT_FILE = r'/Users/chetangrandhe/Desktop/tinderjobs/backend/credentials.json'
 credentials = service_account.Credentials.from_service_account_file(
     SERVICE_ACCOUNT_FILE, scopes=SCOPES
 )
